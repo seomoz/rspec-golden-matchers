@@ -1,4 +1,4 @@
-rspec-golden-matchers [![Build Status](https://travis-ci.org/seomoz/qless.svg?branch=master)](https://travis-ci.org/seomoz/qless)
+rspec-golden-matchers [![Build Status](https://travis-ci.org/seomoz/rspec-golden-matchers.svg?branch=master)](https://travis-ci.org/seomoz/rspec-golden-matchers)
 ===================
 
 [RSpec 3](https://www.relishapp.com/rspec) matchers for [Golden test](http://blog.codeclimate.com/blog/2014/02/20/gold-master-testing/) regression testing (they might work for earlier versions of RSpec, and might not).
