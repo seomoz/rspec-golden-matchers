@@ -1,0 +1,18 @@
+## VIM
+*.swp
+
+## RubyMine
+.idea/
+
+Gemfile.lock
+
+tmp
+.bundle
+bundle
+bin/*
+
+.rspec-local
+spec/examples.txt
+
+# For poor Mac users:
+.DS_Store
