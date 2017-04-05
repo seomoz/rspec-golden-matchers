@@ -69,6 +69,18 @@ RSpec.describe 'RSpec::Matchers::Golden::match_golden' do
     end
   end
 
+  context 'when comparing with JsonFormatter' do
+    it 'can compare hashes and arrays as json' do
+      expect({fox: ['quick', 'brown'], dog: 'lazy'}).to match_golden_json('gold/json_structs.json')
+    end
+
+    it 'can compare hashes and arrays as json excluding keys' do
+      expect({id: 20, fox: ['quick', 'brown'], dog: 'lazy'}).to(
+        match_golden_json('gold/json_structs.json', excluded: [:id])
+      )
+    end
+  end
+
   context 'when recording' do
     before do
       @golden = ENV[RSpec::Matchers::Golden::GOLDEN_ENV]
