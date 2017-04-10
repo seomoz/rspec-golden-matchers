@@ -110,6 +110,46 @@ module RSpec::Matchers::Golden
     end
   end
 
+  class JsonFormatter
+
+    def initialize(args={})
+      @excluded = (ex = args[:excluded]) && ex.map { |k| k.to_sym }
+    end
+
+    def deep_exclude(element)
+      return element unless @excluded && @excluded.size > 0
+      case element
+        when Hash
+          element.inject({}) do |hash, (key, value)|
+            unless @excluded.include? key.to_sym
+              hash[key] = deep_type?(value) ? deep_exclude(value) : value
+            end
+            hash
+          end
+        when Array
+          element.inject([]) do |array, value|
+            array.push(deep_type?(value) ? deep_exclude(value) : value)
+          end
+        else
+          element
+      end
+    end
+
+    def deep_type?(element)
+      element != nil && (element.kind_of?(Hash) || element.kind_of?(Array))
+    end
+
+    def call(value)
+      raise ArgumentError.new('The input must be a hash') unless value.kind_of? Hash
+      excluded_value = deep_exclude(value)
+      begin
+        ::JSON.pretty_generate(excluded_value)
+      rescue JSON::GeneratorError
+        excluded_value.to_json
+      end
+    end
+  end
+
 
   # A matcher for the file.
   #
@@ -137,6 +177,24 @@ module RSpec::Matchers::Golden
       raise ArgumentError.new('formatter and block cannot be specified simultaneously')
     end
     GoldenMatcher.new(golden_filename, caller_path,
-      formatter || formatter_block || GoldenMatcher.method(:default_formatter))
+                      formatter || formatter_block || GoldenMatcher.method(:default_formatter))
+  end
+
+
+  # A matcher for the file using the json formatter, enabled to exclude keys from the comparison
+  #
+  # `golden_filename` specifies stored location of the data. If the filename starts with `./`,
+  # `../`, or `/`, it is considered fully specified, and used as-is. Otherwise it is treated as
+  # location relative to location of the invoking spec (or, more precisely, to `caller_path`).
+  #
+  # `caller_path` is not expected to be used in specs. It however can become handy when new matchers
+  # are constructed from `match_golden`
+  #
+  # `excluded` is a list with the name of the keys to be excluded from the comparison. For example:
+  # [:id, :created_at, :updated_at] if you are working with active record
+  def match_golden_json(golden_filename,
+                        caller_path: caller_locations(1..1).first.path,
+                        excluded: nil)
+    match_golden(golden_filename, caller_path: caller_path, formatter: JsonFormatter.new(excluded: excluded))
   end
 end
